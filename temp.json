@@ -1,0 +1,149 @@
+{
+    "acc0": [
+        "200",
+        "200"
+    ],
+    "acc1": [
+        "300",
+        "400"
+    ],
+    "acc2": [
+        "0",
+        "0"
+    ],
+    "acc3": [
+        "0",
+        "0"
+    ],
+    "acc4": [
+        "0",
+        "0"
+    ],
+    "acc5": [
+        "0",
+        "0"
+    ],
+    "acc6": [
+        "0",
+        "0"
+    ],
+    "acc7": [
+        "0",
+        "0"
+    ],
+    "address0": "3",
+    "address1": "4",
+    "address2": "",
+    "address3": "",
+    "address4": "",
+    "address5": "",
+    "address6": "",
+    "address7": "",
+    "alarm0": "",
+    "alarm1": "",
+    "alarm2": "",
+    "alarm3": "",
+    "alarm4": "",
+    "alarm5": "",
+    "alarm6": "",
+    "alarm7": "",
+    "name0": "x",
+    "name1": "y",
+    "name2": "",
+    "name3": "",
+    "name4": "",
+    "name5": "",
+    "name6": "",
+    "name7": "",
+    "position0": "99999",
+    "position1": "10000",
+    "position2": "0",
+    "position3": "0",
+    "position4": "0",
+    "position5": "0",
+    "position6": "0",
+    "position7": "0",
+    "positionLimit0": [
+        "800000",
+        "1000000"
+    ],
+    "positionLimit1": [
+        "1000000",
+        "1000000"
+    ],
+    "positionLimit2": [
+        "0",
+        "0"
+    ],
+    "positionLimit3": [
+        "0",
+        "0"
+    ],
+    "positionLimit4": [
+        "0",
+        "0"
+    ],
+    "positionLimit5": [
+        "0",
+        "0"
+    ],
+    "positionLimit6": [
+        "0",
+        "0"
+    ],
+    "positionLimit7": [
+        "0",
+        "0"
+    ],
+    "rateLimit0": "0",
+    "rateLimit1": "0",
+    "rateLimit7": "0",
+    "resolution0": "20000",
+    "resolution1": "20000",
+    "resolution2": "0",
+    "resolution3": "0",
+    "resolution4": "0",
+    "resolution5": "0",
+    "resolution6": "0",
+    "resolution7": "0",
+    "speed0": "5",
+    "speed1": "5",
+    "speed2": "0",
+    "speed3": "0",
+    "speed4": "0",
+    "speed5": "0",
+    "speed6": "0",
+    "speed7": "0",
+    "speedLimit0": "5",
+    "speedLimit1": "5",
+    "speedLimit2": "0",
+    "speedLimit3": "0",
+    "speedLimit4": "0",
+    "speedLimit5": "0",
+    "speedLimit6": "0",
+    "speedLimit7": "0",
+    "type0": "unknown",
+    "type1": "unknown",
+    "type2": "",
+    "type3": "",
+    "type4": "",
+    "type5": "",
+    "type6": "",
+    "type7": "",
+    "version0": "unknown",
+    "version1": "unknown",
+    "version2": "",
+    "version3": "",
+    "version4": "",
+    "version5": "",
+    "version6": "",
+    "version7": "",
+    "zero0": "",
+    "zero1": "-33",
+    "zero2": "",
+    "zero3": "",
+    "zero4": "",
+    "zero5": "",
+    "zero6": "",
+    "zero7": ""
+}
