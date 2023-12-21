@@ -18,42 +18,67 @@ void Widget::findPort()
     }
 }
 
-
-void Widget::setParam(motor myMotor,int index)
+void Widget::loadlocalmotor(QString filePath)
 {
-    setui *nw = new setui();
-    nw->setAttribute(Qt::WA_DeleteOnClose);
-    nw->show();
-
     QFileInfo fileinfo(QDir::currentPath());
     rootPath  = fileinfo.path();
-    QFile file(rootPath+"/demo/temp.json");
+    QFile file(rootPath + filePath);
     file.open(QIODevice::ReadOnly);
     QByteArray jsonData = file.readAll();
     QJsonDocument jsonDoc = QJsonDocument::fromJson(jsonData);
     QJsonObject jsonObject = jsonDoc.object();
 
-    QString i = QString::number(index);
+    for (int i = 0;i<8;i++)
+    {
+        QString jsonindex = QString::number(i);
+
+        mymotor[i].name = jsonObject.value("name"+jsonindex).toString();
+        mymotor[i].address = jsonObject.value("address"+jsonindex).toString();
+        mymotor[i].type = jsonObject.value("type"+jsonindex).toString();
+        mymotor[i].version = jsonObject.value("version"+jsonindex).toString();
+
+
+        mymotor[i].speed = jsonObject.value("speed"+jsonindex).toString();
+        mymotor[i].rateLimit = jsonObject.value("speedLimit"+jsonindex).toString();
+        mymotor[i].acc[0] = jsonObject.value("acc"+jsonindex).toArray()[0].toString();
+        mymotor[i].acc[1] = jsonObject.value("acc"+jsonindex).toArray()[1].toString();
+
+        mymotor[i].position = jsonObject.value("position"+jsonindex).toString();
+        mymotor[i].positionLimit[0] = jsonObject.value("positionLimit"+jsonindex).toArray()[0].toString();
+        mymotor[i].positionLimit[1] = jsonObject.value("positionLimit"+jsonindex).toArray()[1].toString();
+
+        mymotor[i].alarm = jsonObject.value("alarm"+jsonindex).toString();
+        mymotor[i].zero = jsonObject.value("zero"+jsonindex).toString();
+        mymotor[i].resolution = jsonObject.value("resolution"+jsonindex).toString();
+
+        refreshUi(mymotor[i],i);
+
+    }
+
+}
+
+
+void Widget::setParam(motor myMotor,int index,QString filePath)
+{
+    setui *nw = new setui();
+    nw->setAttribute(Qt::WA_DeleteOnClose);
+    nw->show();
 
     //初始化界面
-    nw->ui->nameSet->setText(jsonObject.value("name"+i).toString());
-    nw->ui->addressSet->setText(jsonObject.value("address"+i).toString());
-    nw->ui->typeSet->setText(jsonObject.value("type"+i).toString());
-    nw->ui->versionSet->setText(jsonObject.value("version"+i).toString());
+    nw->ui->nameSet->setText(myMotor.name);
+    nw->ui->addressSet->setText(myMotor.address);
+    nw->ui->typeSet->setText(myMotor.type);
+    nw->ui->versionSet->setText(myMotor.version);
 
-    nw->ui->speedLimitSet->setValue(jsonObject.value("rateLimit"+i).toString().toInt());
-    nw->ui->speedSet->setValue(jsonObject.value("speed"+i).toString().toInt());
+    nw->ui->speedLimitSet->setValue(myMotor.rateLimit.toInt());
+    nw->ui->speedSet->setValue(myMotor.speed.toInt());
+    nw->ui->accSet->setValue(myMotor.acc[0].toInt());
+    nw->ui->decSet->setValue(myMotor.acc[1].toInt());
 
-    nw->ui->accSet->setValue(jsonObject.value("acc"+i).toArray()[0].toString().toInt());
-    nw->ui->decSet->setValue(jsonObject.value("acc"+i).toArray()[1].toString().toInt());
+    nw->ui->positionSet->setValue(myMotor.position.toInt());
+    nw->ui->resolution->setValue(myMotor.resolution.toInt());
 
-    nw->ui->positionSet->setValue(jsonObject.value("position"+i).toString().toInt());
-
-    nw->ui->resolution->setValue(jsonObject.value("resolution"+i).toString().toInt());
-
-
-    nw->ui->ex_pos->setValue(jsonObject.value("position"+i).toString().toDouble()/nw->ui->resolution->value());
-
+    nw->ui->ex_pos->setValue(myMotor.position.toDouble()/nw->ui->resolution->value());
 
     void (QSpinBox::* pQSpinBoxSignal)(int) = &QSpinBox::valueChanged;
     QObject::connect(nw->ui->positionSet, pQSpinBoxSignal, [=](){
@@ -68,10 +93,9 @@ void Widget::setParam(motor myMotor,int index)
         nw->ui->positionSet->setValue(int(temp));
     });
 
-    nw->ui->positionLimitSet1->setValue(jsonObject.value("positionLimit"+i).toArray()[0].toString().toInt());
-    nw->ui->positionLimitSet2->setValue(jsonObject.value("positionLimit"+i).toArray()[1].toString().toInt());
+    nw->ui->positionLimitSet1->setValue(myMotor.positionLimit[0].toInt());
+    nw->ui->positionLimitSet2->setValue(myMotor.positionLimit[1].toInt());
 
-    file.close();
 
     //保存更改
     QObject::connect(nw->ui->yes,&QPushButton::clicked,
@@ -91,12 +115,15 @@ void Widget::setParam(motor myMotor,int index)
         mymotor[index].positionLimit[0] = nw->ui->positionLimitSet1->text();
         mymotor[index].positionLimit[1] = nw->ui->positionLimitSet2->text();
 
-        mymotor[index].zero = jsonObject.value("zero"+i).toString();
+        mymotor[index].zero = myMotor.zero;
         mymotor[index].resolution = nw->ui->resolution->text();
 
         motorset(mymotor[index]);
-        saveJson(mymotor[index],index);
-        refreshUi();
+
+        saveJson(mymotor[index],index,filePath);
+
+        refreshUi(mymotor[index],index);
+
         nw->close();
     });
     QObject::connect(nw->ui->cancel,&QPushButton::clicked,
@@ -107,9 +134,9 @@ void Widget::setParam(motor myMotor,int index)
 
 }
 
-void Widget::saveJson(motor myMotor,int index)
+void Widget::saveJson(motor myMotor,int index,QString filePath)
 {
-    QFile file(rootPath+"/demo/temp.json");
+    QFile file(rootPath+filePath);
 
     file.open(QIODevice::ReadOnly);
     QByteArray jsonData = file.readAll();
@@ -150,7 +177,7 @@ void Widget::saveJson(motor myMotor,int index)
 }
 
 
-void Widget::refreshUi()
+void Widget::refreshUi(motor Mymotor,int index)
 {
 
     QList<QLineEdit*> names = {ui->name_1,ui->name_2,ui->name_3,ui->name_4,
@@ -168,22 +195,22 @@ void Widget::refreshUi()
                                   ui->ex_real_pos_5,ui->ex_real_pos_6,ui->ex_real_pos_7,ui->ex_real_pos_8};
 
 
-    for (int i = 0; i<8; i++)
-    {
-
-        names[i]->setText(mymotor[i].name);
-
-        position[i]->setText(mymotor[i].position);
-
-        QObject::connect(position[i], &QLineEdit::textChanged, [=](){
-            exposition[i]->setText(QString::number(position[i]->text().toDouble()/mymotor[i].resolution.toInt()));
-        });
-        QObject::connect(realposition[i], &QLineEdit::textChanged, [=](){
-            ex_realposition[i]->setText(QString::number(realposition[i]->text().toDouble()/mymotor[i].resolution.toInt()));
-        });
 
 
-    }
+
+    names[index]->setText(Mymotor.name);
+
+    position[index]->setText(Mymotor.position);
+
+    QObject::connect(position[index], &QLineEdit::textChanged, [=](){
+        exposition[index]->setText(QString::number(position[index]
+                                                   ->text().toDouble()/mymotor[index].resolution.toInt()));
+    });
+    QObject::connect(realposition[index], &QLineEdit::textChanged, [=](){
+        ex_realposition[index]->setText(QString::number(realposition[index]
+                                                        ->text().toDouble()/mymotor[index].resolution.toInt()));
+    });
+
 
 
 }
@@ -225,7 +252,7 @@ void Widget::appendMessage(const int &index,const QString &data)
         QByteArray temp = QByteArray((id+data).toUtf8());
         temp.append("\r");
         sendlist.append(temp);
-        qDebug()<<sendlist;
+
 
     }
 }
@@ -237,7 +264,7 @@ void Widget::prependMessage(const int &index,const QString &data)
         QByteArray temp = QByteArray((id+data).toUtf8());
         temp.append("\r");
         sendlist.prepend(temp);
-        qDebug()<<sendlist;
+
     }
 }
 
@@ -330,27 +357,56 @@ void Widget::delay(int t)
 
 void Widget::decode(QString res)
 {
-    QString index = res.mid(0,1);
+    QString address = res.mid(0,1);
 
-    int motorindex;
+    int motoraddress = NULL;
+
+    QList<QString> motorlist = {};
+
     for(int i = 0; i<8; i++)
     {
-        if (mymotor[i].address.toInt()==index.toInt())
+        if (mymotor[i].address!="") motorlist.append(mymotor[i].address);
+
+        if (mymotor[i].address==address)
         {
-            motorindex = i;
-            findChild<QPushButton*>("pushButton_"+QString::number(motorindex+1))->setText(mymotor[motorindex].name);
+           findChild<QPushButton*>("pushButton_"+QString::number(i+1))->setText(mymotor[i].name);
+           findChild<QPushButton*>("pushButton_"+QString::number(i+1))->setStyleSheet("background-color: yellow");
+
+
+           refreshUi(mymotor[i],i);
+           motoraddress = i;
         }
     }
 
-    if (index!="9")
+
+    int temp = NULL;
+    for (int i = 0;i<motorlist.length();i++)
+    {
+        if(address==motorlist[i]) break;
+        temp = i+1;
+    }
+
+    if(temp==motorlist.length())
+    {
+        mymotor[temp].address=address;
+        mymotor[temp].name="new";
+        findChild<QPushButton*>("pushButton_"+QString::number(temp+1))->setText(mymotor[temp].name);
+        findChild<QPushButton*>("pushButton_"+QString::number(temp+1))->setStyleSheet("background-color: yellow");
+
+        refreshUi(mymotor[temp],temp);
+    }
+
+
+    if (address!="9")
     {
         if(res.mid(1,2)=="IP")//位置
         {
-            QString IP = res.mid(4,-1);
+            QString IP = res.mid(3,-1);
 
-            findChild<QLineEdit*>("realposition_"+QString::number(motorindex+1))
-                    ->setText(QString::number(IP.toInt()-mymotor[motorindex].zero.toInt()));
-            mymotor[motorindex].realPosition = IP;
+            findChild<QLineEdit*>("realposition_"+QString::number(motoraddress+1))
+                    ->setText(QString::number(IP.toInt()-mymotor[motoraddress].zero.toInt()));
+
+            mymotor[motoraddress].realPosition = IP;
         }
 
         else if(res.mid(1,2)=="AL")//报警
@@ -359,35 +415,35 @@ void Widget::decode(QString res)
             QString alarm = res.mid(4,-1);
 
             if(alarm!="0000")
-                findChild<QCheckBox*>("alarmflag_"+QString::number(motorindex+1))->setChecked(true);
+                findChild<QCheckBox*>("alarmflag_"+QString::number(motoraddress+1))->setChecked(true);
             else
-                findChild<QCheckBox*>("alarmflag_"+QString::number(motorindex+1))->setChecked(false);
+                findChild<QCheckBox*>("alarmflag_"+QString::number(motoraddress+1))->setChecked(false);
 
             switch (alarm.mid(2,1).toInt())
             {
                 case 8://过流
-                    findChild<QCheckBox*>("overcurrent_"+QString::number(motorindex+1))->setChecked(true);
+                    findChild<QCheckBox*>("overcurrent_"+QString::number(motoraddress+1))->setChecked(true);
                     break;
                 default:
-                    findChild<QCheckBox*>("overcurrent_"+QString::number(motorindex+1))->setChecked(false);
+                    findChild<QCheckBox*>("overcurrent_"+QString::number(motoraddress+1))->setChecked(false);
                     break;
             }
 
             switch (alarm.mid(3,1).toInt())
             {
                 case 2://反转限位 1 0002
-                    findChild<QCheckBox*>("ccwlimit_"+QString::number(motorindex+1))->setChecked(true);
+                    findChild<QCheckBox*>("ccwlimit_"+QString::number(motoraddress+1))->setChecked(true);
                     break;
                 case 4://正转限位 2 0004
-                    findChild<QCheckBox*>("cwlimit_"+QString::number(motorindex+1))->setChecked(true);
+                    findChild<QCheckBox*>("cwlimit_"+QString::number(motoraddress+1))->setChecked(true);
                     break;
                 case 8://过温
-                    findChild<QCheckBox*>("overvtemp_"+QString::number(motorindex+1))->setChecked(true);
+                    findChild<QCheckBox*>("overvtemp_"+QString::number(motoraddress+1))->setChecked(true);
                     break;
                 default:
-                    findChild<QCheckBox*>("overvtemp_"+QString::number(motorindex+1))->setChecked(false);
-                    findChild<QCheckBox*>("cwlimit_"+QString::number(motorindex+1))->setChecked(false);
-                    findChild<QCheckBox*>("ccwlimit_"+QString::number(motorindex+1))->setChecked(false);
+                    findChild<QCheckBox*>("overvtemp_"+QString::number(motoraddress+1))->setChecked(false);
+                    findChild<QCheckBox*>("cwlimit_"+QString::number(motoraddress+1))->setChecked(false);
+                    findChild<QCheckBox*>("ccwlimit_"+QString::number(motoraddress+1))->setChecked(false);
                     break;
             }
 
@@ -398,16 +454,19 @@ void Widget::decode(QString res)
 
             if (state.contains("F") or state.contains("J") or state.contains("M"))//    A=报警出现 D=驱动器禁止E=驱动器出错H=正在找原点J=正在点动F=正在运动（Feed&Jog 指令）M=正在运动（任意输入信号）R=准备完毕
             {
-                findChild<QCheckBox*>("moveflag_"+QString::number(motorindex+1))->setChecked(true);
-                findChild<QCheckBox*>("OKflag_"+QString::number(motorindex+1))->setChecked(false);
+                findChild<QCheckBox*>("moveflag_"+QString::number(motoraddress+1))->setChecked(true);
+                findChild<QCheckBox*>("OKflag_"+QString::number(motoraddress+1))->setChecked(false);
             }
             else
             {
-                findChild<QCheckBox*>("moveflag_"+QString::number(motorindex+1))->setChecked(false);
-                findChild<QCheckBox*>("OKflag_"+QString::number(motorindex+1))->setChecked(true);
+                findChild<QCheckBox*>("moveflag_"+QString::number(motoraddress+1))->setChecked(false);
+                findChild<QCheckBox*>("OKflag_"+QString::number(motoraddress+1))->setChecked(true);
             }
 
         }
 
     }
+
+
+
 }

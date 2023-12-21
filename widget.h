@@ -33,14 +33,16 @@ public:
     explicit Widget(QWidget *parent = nullptr);
     ~Widget();
 
-    void setParam(motor myMotor,int index);
+    void setParam(motor myMotor,int index,QString filePath);
     static void delay(int t);
-    void saveJson(motor myMotor,int index);
-    void refreshUi();
+    void saveJson(motor myMotor,int index,QString filePath);
+    void refreshUi(motor myMotor,int index);
 
     void findPort();
     void connectPort();
 
+
+    void loadlocalmotor(QString filePath);
 
     void reseiveMessage();
     void decode(QString res);
@@ -52,7 +54,8 @@ public:
     static QSerialPort *myPort;
 
     QString portName;
-    bool openFlag;   
+    bool openFlag;
+    bool findFlag = false;
     static motor mymotor[8];
     QList <QByteArray> sendlist;
 

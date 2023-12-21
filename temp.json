@@ -95,7 +95,7 @@
         "0",
         "0"
     ],
-    "rateLimit0": "0",
+    "rateLimit0": "5",
     "rateLimit1": "0",
     "rateLimit7": "0",
     "resolution0": "20000",

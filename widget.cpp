@@ -12,13 +12,13 @@ int Widget::stopflag = 0;
 motor Widget::mymotor[8] = {};
 
 
-
 Widget::Widget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::Widget)
 {
     ui->setupUi(this);
     findPort();
+    loadlocalmotor("/demo/temp.json");
 
     for (int i = 0;i<8;i++)
     {
@@ -70,12 +70,12 @@ Widget::Widget(QWidget *parent) :
         });
         QObject::connect(setbtn,&QPushButton::clicked,[=]()
         {
-            setParam(mymotor[i],i);//设置
+            setParam(mymotor[i],i,"/demo/temp.json");//设置
         });
         QObject::connect(set0btn,&QPushButton::clicked,[=]()  //运动时禁止使用
         {
             mymotor[i].zero = mymotor[i].realPosition;
-            saveJson(mymotor[i],i);
+            saveJson(mymotor[i],i,"/demo/temp.json");
         });
     }
 
@@ -88,13 +88,15 @@ Widget::~Widget()
 
 void Widget::on_refresh_clicked()
 {
-     findPort();
+    findFlag = true;
+    findPort();
 
 }
 
 void Widget::on_connect_clicked()
 {
     connectPort();
+    findFlag = true;
 
     QObject::connect(myPort,&QSerialPort::readyRead,[=]()
     {
@@ -111,6 +113,7 @@ void Widget::on_connect_clicked()
         timer->start(500);
 
     }
+
 
     QObject::connect(timer3,&QTimer::timeout,[=]()
     {
