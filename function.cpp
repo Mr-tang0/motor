@@ -196,8 +196,6 @@ void Widget::refreshUi(motor Mymotor,int index)
 
 
 
-
-
     names[index]->setText(Mymotor.name);
 
     position[index]->setText(Mymotor.position);
@@ -210,8 +208,6 @@ void Widget::refreshUi(motor Mymotor,int index)
         ex_realposition[index]->setText(QString::number(realposition[index]
                                                         ->text().toDouble()/mymotor[index].resolution.toInt()));
     });
-
-
 
 }
 
@@ -252,8 +248,6 @@ void Widget::appendMessage(const int &index,const QString &data)
         QByteArray temp = QByteArray((id+data).toUtf8());
         temp.append("\r");
         sendlist.append(temp);
-
-
     }
 }
 void Widget::prependMessage(const int &index,const QString &data)
@@ -263,24 +257,26 @@ void Widget::prependMessage(const int &index,const QString &data)
     {
         QByteArray temp = QByteArray((id+data).toUtf8());
         temp.append("\r");
-        sendlist.prepend(temp);
-
+        sendlist.prepend(temp);   
     }
 }
 
 void  Widget::reseiveMessage()
 {
+    delay(40);
     QString ress = myPort->readAll();
-    delay(50);
     qDebug()<<ress;
     QRegExp newline("\r");
     if(ress.indexOf(newline)!=-1)
     {
         ress = ress.left(ress.indexOf(newline));
+
     }
     else ress = "9"; //自己设置的零响应代码
 
-    decode(ress);
+
+    if(0<ress.mid(0,1).toInt()<9)
+        decode(ress);
 
 }
 
@@ -386,7 +382,7 @@ void Widget::decode(QString res)
         temp = i+1;
     }
 
-    if(temp==motorlist.length())
+    if(temp==motorlist.length() and 0<address.toInt()<9 and address!="9")
     {
         mymotor[temp].address=address;
         mymotor[temp].name="new";
@@ -399,14 +395,17 @@ void Widget::decode(QString res)
 
     if (address!="9")
     {
+
         if(res.mid(1,2)=="IP")//位置
         {
-            QString IP = res.mid(3,-1);
 
+            QString IP = res.mid(4,-1);
+            mymotor[motoraddress].realPosition = IP;
+            qDebug()<<IP;
             findChild<QLineEdit*>("realposition_"+QString::number(motoraddress+1))
                     ->setText(QString::number(IP.toInt()-mymotor[motoraddress].zero.toInt()));
 
-            mymotor[motoraddress].realPosition = IP;
+
         }
 
         else if(res.mid(1,2)=="AL")//报警

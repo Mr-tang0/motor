@@ -35,6 +35,9 @@ Widget::Widget(QWidget *parent) :
 
         QPushButton *motorbtn = findChild<QPushButton*>("pushButton_"+QString::number(i+1));
 
+        QPushButton *clearbtn = findChild<QPushButton*>("clear_"+QString::number(i+1));
+        QPushButton *deletebtn = findChild<QPushButton*>("delete_"+QString::number(i+1));
+
         QObject::connect(motorbtn,&QPushButton::clicked,[=]()
         {
             ui->motorTab->setCurrentIndex(i);
@@ -56,17 +59,19 @@ Widget::Widget(QWidget *parent) :
         {
             stopflag = 1;
             sendlist.clear();
-            appendMessage(mymotor[i].address.toInt(),"SK");//停止
+            prependMessage(mymotor[i].address.toInt(),"SK");//停止
         });
 
         QObject::connect(enablebtn,&QPushButton::clicked,[=]()
         {
-            appendMessage(mymotor[i].address.toInt(),"ME");//使能
+            prependMessage(mymotor[i].address.toInt(),"ME");//使能
+            findChild<QCheckBox*>("enableflag_"+QString::number(i+1))->setChecked(true);
         });
 
         QObject::connect(disablebtn,&QPushButton::clicked,[=]()
         {
-            appendMessage(mymotor[i].address.toInt(),"MD");//非使能
+            prependMessage(mymotor[i].address.toInt(),"MD");//非使能
+            findChild<QCheckBox*>("enableflag_"+QString::number(i+1))->setChecked(false);
         });
         QObject::connect(setbtn,&QPushButton::clicked,[=]()
         {
@@ -76,6 +81,15 @@ Widget::Widget(QWidget *parent) :
         {
             mymotor[i].zero = mymotor[i].realPosition;
             saveJson(mymotor[i],i,"/demo/temp.json");
+        });
+        QObject::connect(clearbtn,&QPushButton::clicked,[=]()
+        {
+            prependMessage(mymotor[i].address.toInt(),"AR");//清除报警
+        });
+        QObject::connect(deletebtn,&QPushButton::clicked,[=]()
+        {
+            mymotor[i] = *(new motor);
+            refreshUi(mymotor[i],i);
         });
     }
 
@@ -103,14 +117,15 @@ void Widget::on_connect_clicked()
         reseiveMessage();
     });
 
-    for(int i =3;i<5;i++)
+    for(int i =1;i<9;i++)
     {
         QObject::connect(timer,&QTimer::timeout,[=]()
         {
             appendMessage(i,"IP");
             appendMessage(i,"AL");//警报
+            appendMessage(i,"RS");//警报
         });
-        timer->start(500);
+        timer->start(250);
 
     }
 
@@ -120,6 +135,7 @@ void Widget::on_connect_clicked()
         if(!sendlist.isEmpty())
         {
             myPort->write(sendlist.first());
+            qDebug()<<sendlist.first();
             sendlist.removeFirst();
         }
 

@@ -710,7 +710,7 @@
         <string>过流</string>
        </property>
       </widget>
-      <widget class="QPushButton" name="pushButton_9">
+      <widget class="QPushButton" name="clear_1">
        <property name="geometry">
         <rect>
          <x>70</x>
@@ -721,6 +721,19 @@
        </property>
        <property name="text">
         <string>清除报警</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="delete_1">
+       <property name="geometry">
+        <rect>
+         <x>70</x>
+         <y>210</y>
+         <width>93</width>
+         <height>28</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>删除电机</string>
        </property>
       </widget>
      </widget>
@@ -853,7 +866,7 @@
         <string>过流</string>
        </property>
       </widget>
-      <widget class="QPushButton" name="pushButton_10">
+      <widget class="QPushButton" name="clear_2">
        <property name="geometry">
         <rect>
          <x>70</x>
@@ -864,6 +877,19 @@
        </property>
        <property name="text">
         <string>清除报警</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="delete_2">
+       <property name="geometry">
+        <rect>
+         <x>70</x>
+         <y>210</y>
+         <width>93</width>
+         <height>28</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>删除电机</string>
        </property>
       </widget>
      </widget>
@@ -1244,7 +1270,7 @@
         <string>过流</string>
        </property>
       </widget>
-      <widget class="QPushButton" name="pushButton_11">
+      <widget class="QPushButton" name="clear_3">
        <property name="geometry">
         <rect>
          <x>70</x>
@@ -1255,6 +1281,19 @@
        </property>
        <property name="text">
         <string>清除报警</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="delete_3">
+       <property name="geometry">
+        <rect>
+         <x>70</x>
+         <y>210</y>
+         <width>93</width>
+         <height>28</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>删除电机</string>
        </property>
       </widget>
      </widget>
@@ -1635,7 +1674,20 @@
         <string>过流</string>
        </property>
       </widget>
-      <widget class="QPushButton" name="pushButton_12">
+      <widget class="QPushButton" name="delete_4">
+       <property name="geometry">
+        <rect>
+         <x>70</x>
+         <y>210</y>
+         <width>93</width>
+         <height>28</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>删除电机</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="clear_4">
        <property name="geometry">
         <rect>
          <x>70</x>
@@ -2026,7 +2078,20 @@
         <string>过流</string>
        </property>
       </widget>
-      <widget class="QPushButton" name="pushButton_13">
+      <widget class="QPushButton" name="delete_5">
+       <property name="geometry">
+        <rect>
+         <x>70</x>
+         <y>210</y>
+         <width>93</width>
+         <height>28</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>删除电机</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="clear_5">
        <property name="geometry">
         <rect>
          <x>70</x>
@@ -2417,7 +2482,20 @@
         <string>过流</string>
        </property>
       </widget>
-      <widget class="QPushButton" name="pushButton_14">
+      <widget class="QPushButton" name="delete_6">
+       <property name="geometry">
+        <rect>
+         <x>70</x>
+         <y>210</y>
+         <width>93</width>
+         <height>28</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>删除电机</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="clear_6">
        <property name="geometry">
         <rect>
          <x>70</x>
@@ -2808,7 +2886,20 @@
         <string>过流</string>
        </property>
       </widget>
-      <widget class="QPushButton" name="pushButton_15">
+      <widget class="QPushButton" name="delete_7">
+       <property name="geometry">
+        <rect>
+         <x>70</x>
+         <y>210</y>
+         <width>93</width>
+         <height>28</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>删除电机</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="clear_7">
        <property name="geometry">
         <rect>
          <x>70</x>
@@ -3199,7 +3290,20 @@
         <string>过流</string>
        </property>
       </widget>
-      <widget class="QPushButton" name="pushButton_16">
+      <widget class="QPushButton" name="delete_8">
+       <property name="geometry">
+        <rect>
+         <x>70</x>
+         <y>210</y>
+         <width>93</width>
+         <height>28</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>删除电机</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="clear_8">
        <property name="geometry">
         <rect>
          <x>70</x>

@@ -17,7 +17,9 @@ void movework::motorMove()
         emit sendData(address,"FL"+moveLength);
         emit sendData(address,"IP");
         emit sendData(address,"AL");
-        delay(10);
+        emit sendData(address,"RS");
+
+        delay(400);
     }
     if(len%10000!=0 and Widget::stopflag!=1)
     {
@@ -26,6 +28,7 @@ void movework::motorMove()
         emit sendData(address,"FL"+moveLength);
         emit sendData(address,"IP");
         emit sendData(address,"AL");
+        emit sendData(address,"RS");
     }
 }
 
