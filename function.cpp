@@ -50,6 +50,7 @@ void Widget::loadlocalmotor(QString filePath)
         mymotor[i].alarm = jsonObject.value("alarm"+jsonindex).toString();
         mymotor[i].zero = jsonObject.value("zero"+jsonindex).toString();
         mymotor[i].resolution = jsonObject.value("resolution"+jsonindex).toString();
+        mymotor[i].len = jsonObject.value("len"+jsonindex).toString().toInt();
 
         refreshUi(mymotor[i],i);
 
@@ -78,18 +79,18 @@ void Widget::setParam(motor myMotor,int index,QString filePath)
     nw->ui->positionSet->setValue(myMotor.position.toInt());
     nw->ui->resolution->setValue(myMotor.resolution.toInt());
 
-    nw->ui->ex_pos->setValue(myMotor.position.toDouble()/nw->ui->resolution->value());
+    nw->ui->ex_pos->setValue(myMotor.position.toDouble()/nw->ui->resolution->value()/myMotor.len);
 
-    void (QSpinBox::* pQSpinBoxSignal)(int) = &QSpinBox::valueChanged;
-    QObject::connect(nw->ui->positionSet, pQSpinBoxSignal, [=](){
-        double temp = nw->ui->positionSet->text().toDouble()/nw->ui->resolution->value();
-        nw->ui->ex_pos->setValue(temp);
-    });
+//    void (QSpinBox::* pQSpinBoxSignal)(int) = &QSpinBox::valueChanged;
+//    QObject::connect(nw->ui->positionSet, pQSpinBoxSignal, [=](){
+//        double temp = nw->ui->positionSet->text().toDouble()/nw->ui->resolution->value();
+//        nw->ui->ex_pos->setValue(temp);
+//    });
 
 
     void (QDoubleSpinBox::* pQSpinBoxSignal2)(double) = &QDoubleSpinBox::valueChanged;
     QObject::connect(nw->ui->ex_pos, pQSpinBoxSignal2, [=](){
-        double temp = nw->ui->ex_pos->value()*nw->ui->resolution->value();
+        double temp = nw->ui->ex_pos->value()*nw->ui->resolution->value()*myMotor.len;
         nw->ui->positionSet->setValue(int(temp));
     });
 
@@ -101,7 +102,6 @@ void Widget::setParam(motor myMotor,int index,QString filePath)
     QObject::connect(nw->ui->yes,&QPushButton::clicked,
                      [=]()
     {        
-
         mymotor[index].name = nw->ui->nameSet->text();
         mymotor[index].address = nw->ui->addressSet->text();
         mymotor[index].type = nw->ui->typeSet->text();
@@ -180,33 +180,28 @@ void Widget::saveJson(motor myMotor,int index,QString filePath)
 void Widget::refreshUi(motor Mymotor,int index)
 {
 
-    QList<QLineEdit*> names = {ui->name_1,ui->name_2,ui->name_3,ui->name_4,
-                               ui->name_5,ui->name_6,ui->name_7,ui->name_8};
-    QList<QLineEdit*> position = {ui->position_1,ui->position_2,ui->position_3,ui->position_4,
-                                  ui->position_5,ui->position_6,ui->position_7,ui->position_8};
-
-    QList<QLineEdit*> exposition = {ui->ex_pos_1,ui->ex_pos_2,ui->ex_pos_3,ui->ex_pos_4,
-                                  ui->ex_pos_5,ui->ex_pos_6,ui->ex_pos_7,ui->ex_pos_8};
-
-    QList<QLineEdit*> realposition = {ui->realposition_1,ui->realposition_2,ui->realposition_3,ui->realposition_4,
-                                  ui->realposition_5,ui->realposition_6,ui->realposition_7,ui->realposition_8};
-
-    QList<QLineEdit*> ex_realposition = {ui->ex_real_pos_1,ui->ex_real_pos_2,ui->ex_real_pos_3,ui->ex_real_pos_4,
-                                  ui->ex_real_pos_5,ui->ex_real_pos_6,ui->ex_real_pos_7,ui->ex_real_pos_8};
+    QLineEdit*name = findChild<QLineEdit*>("name_"+QString::number(index+1));
+    QLineEdit*position = findChild<QLineEdit*>("position_"+QString::number(index+1));
+    QLineEdit*ex_pos = findChild<QLineEdit*>("ex_pos_"+QString::number(index+1));
+    QLineEdit*realposition = findChild<QLineEdit*>("realposition_"+QString::number(index+1));
+    QLineEdit*ex_real_pos = findChild<QLineEdit*>("ex_real_pos_"+QString::number(index+1));
 
 
+    name->setText(Mymotor.name);
 
-    names[index]->setText(Mymotor.name);
+    position->setText(Mymotor.position);
+    qDebug()<<Mymotor.position;
 
-    position[index]->setText(Mymotor.position);
 
-    QObject::connect(position[index], &QLineEdit::textChanged, [=](){
-        exposition[index]->setText(QString::number(position[index]
-                                                   ->text().toDouble()/mymotor[index].resolution.toInt()));
+    ex_pos->setText(QString::number(position->text().toDouble()/mymotor[index].resolution.toInt()/Mymotor.len));
+
+    QObject::connect(position, &QLineEdit::textChanged, [=](){
+       ex_pos->setText(QString::number(position->text().toDouble()/mymotor[index].resolution.toInt()/Mymotor.len));
     });
-    QObject::connect(realposition[index], &QLineEdit::textChanged, [=](){
-        ex_realposition[index]->setText(QString::number(realposition[index]
-                                                        ->text().toDouble()/mymotor[index].resolution.toInt()));
+
+
+    QObject::connect(realposition, &QLineEdit::textChanged, [=](){
+        ex_real_pos ->setText(QString::number(realposition->text().toDouble()/mymotor[index].resolution.toInt()/Mymotor.len));
     });
 
 }
@@ -275,7 +270,7 @@ void  Widget::reseiveMessage()
     else ress = "9"; //自己设置的零响应代码
 
 
-    if(0<ress.mid(0,1).toInt()<9)
+    if(0<ress.mid(0,1).toInt() and ress.mid(0,1).toInt()<9)
         decode(ress);
 
 }
@@ -368,7 +363,6 @@ void Widget::decode(QString res)
            findChild<QPushButton*>("pushButton_"+QString::number(i+1))->setText(mymotor[i].name);
            findChild<QPushButton*>("pushButton_"+QString::number(i+1))->setStyleSheet("background-color: yellow");
 
-
            refreshUi(mymotor[i],i);
            motoraddress = i;
         }
@@ -382,7 +376,7 @@ void Widget::decode(QString res)
         temp = i+1;
     }
 
-    if(temp==motorlist.length() and 0<address.toInt()<9 and address!="9")
+    if(temp==motorlist.length() and address.toInt()<9 and address!="9")
     {
         mymotor[temp].address=address;
         mymotor[temp].name="new";

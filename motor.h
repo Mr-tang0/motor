@@ -14,6 +14,7 @@ public:
     QString zero,alarm;//原点和报警
     QString resolution;
     QString realPosition;
+    int len;
     int temp;
 
 };

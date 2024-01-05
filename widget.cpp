@@ -3,7 +3,7 @@
 
 #include <QFuture>
 #include <QtConcurrent/QtConcurrent>
-
+#include <QMouseEvent>
 
 QSerialPort *Widget::myPort = new QSerialPort;
 motor *Widget::threadMotor = new motor;
@@ -19,6 +19,7 @@ Widget::Widget(QWidget *parent) :
     ui->setupUi(this);
     findPort();
     loadlocalmotor("/demo/temp.json");
+
 
     for (int i = 0;i<8;i++)
     {
@@ -88,10 +89,17 @@ Widget::Widget(QWidget *parent) :
         });
         QObject::connect(deletebtn,&QPushButton::clicked,[=]()
         {
-            mymotor[i] = *(new motor);
-            refreshUi(mymotor[i],i);
+            for (int j = i;j<8;j++) {
+                mymotor[i] = mymotor[j];
+                refreshUi(mymotor[i],i);
+                if(j==8) mymotor[j] = *new motor;
+            }
+
         });
     }
+
+
+
 
 }
 
@@ -131,11 +139,25 @@ void Widget::on_connect_clicked()
 
 
     QObject::connect(timer3,&QTimer::timeout,[=]()
-    {
+    {            
+        int w_x = this->frameGeometry().x();
+        int w_y = this->frameGeometry().y();
+
+        QPoint coursePoint = QCursor::pos();
+        int p_x = coursePoint.x();
+        int p_y = coursePoint.y();
+
+        p_x = p_x - w_x;
+        p_y = p_y - w_y;
+
+        if(p_x<20 or p_x>660 or p_y<220 or p_y>610)
+        {   stopflag = 1;
+            sendlist.clear();
+        }
+
         if(!sendlist.isEmpty())
         {
             myPort->write(sendlist.first());
-            qDebug()<<sendlist.first();
             sendlist.removeFirst();
         }
 
@@ -158,8 +180,8 @@ void Widget::on_disconnect_clicked()
 void Widget::on_move_clicked()
 {
 
-    moveTo(mymotor[0],ui->axisx->text().toInt());
-    moveTo(mymotor[1],ui->axisy->text().toInt());
+    moveTo(mymotor[0],ui->axisx->text().toInt()*mymotor[0].len*mymotor[0].resolution.toInt());
+    moveTo(mymotor[1],ui->axisy->text().toInt()*mymotor[0].len*mymotor[0].resolution.toInt());
 }
 
 void Widget::on_move_to_zero_clicked()
