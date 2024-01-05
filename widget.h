@@ -21,6 +21,9 @@
 #include <QThread>
 
 
+#include<QMessageBox>
+#include<QCloseEvent>
+
 namespace Ui {
 class Widget;
 }
@@ -51,6 +54,11 @@ public:
     void motorMove(motor myMotor,bool d);
     void moveTo(motor myMotor,int len);
 
+    void closeEvent(QCloseEvent *);
+
+    QString rootPath;
+    QString filepath;
+
     static QSerialPort *myPort;
 
     QString portName;
@@ -65,7 +73,8 @@ public:
     static int stopflag;
 
     int enableFlag = 0;
-    QString rootPath;
+    int onlinecounter[8] ={0,0,0,0,0,0,0,0};
+
     QTimer *timer = new QTimer(this);
     QTimer *timer2 = new QTimer(this);
     QTimer *timer3 = new QTimer(this);
@@ -92,11 +101,14 @@ private slots:
 
     void on_ccwmove_released();
 
+
+
 signals:
     void valueChange(int value);
 
 private:
     Ui::Widget *ui;
+
 
 };
 

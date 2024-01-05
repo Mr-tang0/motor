@@ -5,6 +5,7 @@
 #include <QtConcurrent/QtConcurrent>
 #include <QMouseEvent>
 
+
 QSerialPort *Widget::myPort = new QSerialPort;
 motor *Widget::threadMotor = new motor;
 int Widget::threadflag = 0;
@@ -17,8 +18,11 @@ Widget::Widget(QWidget *parent) :
     ui(new Ui::Widget)
 {
     ui->setupUi(this);
+    this->setWindowTitle("多轴电机控制系统");
     findPort();
-    loadlocalmotor("/demo/temp.json");
+
+    filepath = "/demo/temp.json";
+    loadlocalmotor(filepath);
 
 
     for (int i = 0;i<8;i++)
@@ -89,12 +93,16 @@ Widget::Widget(QWidget *parent) :
         });
         QObject::connect(deletebtn,&QPushButton::clicked,[=]()
         {
-            for (int j = i;j<8;j++) {
-                mymotor[i] = mymotor[j];
-                refreshUi(mymotor[i],i);
-                if(j==8) mymotor[j] = *new motor;
+            for (int j = i;j<7;j++)
+            {
+                mymotor[j]=mymotor[j+1];
+                refreshUi(mymotor[j],j);
             }
-
+            if(i==7)
+            {
+                mymotor[i]=*new motor;
+                refreshUi(mymotor[i],i);
+            }
         });
     }
 
@@ -151,9 +159,8 @@ void Widget::on_connect_clicked()
         p_y = p_y - w_y;
 
         if(p_x<20 or p_x>660 or p_y<220 or p_y>610)
-        {   stopflag = 1;
-            sendlist.clear();
-        }
+        sendlist.clear();
+
 
         if(!sendlist.isEmpty())
         {

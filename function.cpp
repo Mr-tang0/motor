@@ -28,6 +28,7 @@ void Widget::loadlocalmotor(QString filePath)
     QJsonDocument jsonDoc = QJsonDocument::fromJson(jsonData);
     QJsonObject jsonObject = jsonDoc.object();
 
+
     for (int i = 0;i<8;i++)
     {
         QString jsonindex = QString::number(i);
@@ -52,8 +53,19 @@ void Widget::loadlocalmotor(QString filePath)
         mymotor[i].resolution = jsonObject.value("resolution"+jsonindex).toString();
         mymotor[i].len = jsonObject.value("len"+jsonindex).toString().toInt();
 
-        refreshUi(mymotor[i],i);
 
+    }
+    for (int i = 0;i<8;i++)
+    {
+        if (mymotor[i].name == "")
+        {
+            for (int j = 0;j<7-i;j++)
+            {
+                mymotor[i]=mymotor[i+1];
+            }
+            if(i==7)mymotor[i] = *new motor;
+        }
+        refreshUi(mymotor[i],i);
     }
 
 }
@@ -186,11 +198,13 @@ void Widget::refreshUi(motor Mymotor,int index)
     QLineEdit*realposition = findChild<QLineEdit*>("realposition_"+QString::number(index+1));
     QLineEdit*ex_real_pos = findChild<QLineEdit*>("ex_real_pos_"+QString::number(index+1));
 
+    findChild<QPushButton*>("pushButton_"+QString::number(index+1))->setText(Mymotor.name);
+
 
     name->setText(Mymotor.name);
 
     position->setText(Mymotor.position);
-    qDebug()<<Mymotor.position;
+
 
 
     ex_pos->setText(QString::number(position->text().toDouble()/mymotor[index].resolution.toInt()/Mymotor.len));
@@ -357,18 +371,20 @@ void Widget::decode(QString res)
     for(int i = 0; i<8; i++)
     {
         if (mymotor[i].address!="") motorlist.append(mymotor[i].address);
-
         if (mymotor[i].address==address)
         {
            findChild<QPushButton*>("pushButton_"+QString::number(i+1))->setText(mymotor[i].name);
            findChild<QPushButton*>("pushButton_"+QString::number(i+1))->setStyleSheet("background-color: yellow");
-
            refreshUi(mymotor[i],i);
            motoraddress = i;
+           onlinecounter[i] = 0;
+        }
+        onlinecounter[i]++;
+        if(onlinecounter[i]>=3)//无应答时间过长，默认电机下线
+        {
+            findChild<QPushButton*>("pushButton_"+QString::number(i+1))->setStyleSheet("background-color: white");
         }
     }
-
-
     int temp = NULL;
     for (int i = 0;i<motorlist.length();i++)
     {
@@ -376,7 +392,7 @@ void Widget::decode(QString res)
         temp = i+1;
     }
 
-    if(temp==motorlist.length() and address.toInt()<9 and address!="9")
+    if(temp==motorlist.length() and address.toInt()<9 and address!="9")//新电机
     {
         mymotor[temp].address=address;
         mymotor[temp].name="new";
@@ -460,6 +476,41 @@ void Widget::decode(QString res)
 
     }
 
+}
 
+
+void Widget::closeEvent(QCloseEvent *e)
+{
+    QMessageBox msgBox;
+    msgBox.setWindowTitle("提示");
+    msgBox.setText("确认退出?");
+    msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+    msgBox.setDefaultButton(QMessageBox::Ok);
+    int ret = msgBox.exec();
+    if(ret == QMessageBox::Ok)
+    {
+        //窗口关闭
+        ui->statebox->append("-------------------------");
+        ui->statebox->append("正在保存日志");
+        for (int i = 0;i<8;i++)
+        {
+            saveJson(mymotor[i],i,filepath);
+        }
+        sendlist.clear();
+        myPort->close();
+        delay(1000);
+
+        ui->statebox->append("-------------------------");
+        ui->statebox->append("安全退出");
+        delay(1500);
+
+        e->accept();
+    }
+    else
+    {
+        //忽略
+        ui->statebox->append("取消退出");
+        e->ignore();
+    }
 
 }
