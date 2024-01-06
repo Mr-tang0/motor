@@ -74,6 +74,8 @@ public:
 
     int enableFlag = 0;
     int onlinecounter[8] ={0,0,0,0,0,0,0,0};
+    bool blackflag = false;
+    bool styleflag = false;
 
     QTimer *timer = new QTimer(this);
     QTimer *timer2 = new QTimer(this);
@@ -102,6 +104,18 @@ private slots:
     void on_ccwmove_released();
 
 
+
+    void on_BlackandWhite_clicked();
+
+    void on_Clear_clicked();
+
+    void on_Send_clicked();
+
+    void on_Style_clicked();
+
+    void on_About_clicked();
+
+    void on_Help_clicked();
 
 signals:
     void valueChange(int value);

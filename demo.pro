@@ -57,3 +57,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 DISTFILES += \
     demo.txt \
     temp.json
+
+RESOURCES += \
+    img.qrc \
+    myqss.qrc

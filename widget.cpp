@@ -19,9 +19,33 @@ Widget::Widget(QWidget *parent) :
 {
     ui->setupUi(this);
     this->setWindowTitle("多轴电机控制系统");
+    Qt::WindowType flag;
+    flag = Qt::WindowMinimizeButtonHint;
+    this->setWindowFlag(flag);
+    this->setFixedSize(1712,1134);
+
+    this->setWindowIcon(QIcon(":/new/prefix1/img/icon.png"));
+
+    this->setAutoFillBackground(true);
+    QPalette p = this->palette();
+    QPixmap pix(":/new/prefix1/img/mianui02.png");
+    p.setBrush(QPalette::Window,QBrush(pix));
+    this->setPalette(p);
+
+
+    QString qss;
+    QFile qssFile(":/new/prefix1/qss/Utbtu.qss");
+    qssFile.open(QFile::ReadOnly);
+    if(qssFile.isOpen())
+    {
+      qss = QLatin1String(qssFile.readAll());
+      qApp->setStyleSheet(qss);
+      qssFile.close();
+    }
+
     findPort();
 
-    filepath = "/demo/temp.json";
+    filepath = "/temp.json";
     loadlocalmotor(filepath);
 
 
@@ -80,12 +104,12 @@ Widget::Widget(QWidget *parent) :
         });
         QObject::connect(setbtn,&QPushButton::clicked,[=]()
         {
-            setParam(mymotor[i],i,"/demo/temp.json");//设置
+            setParam(mymotor[i],i,filepath);//设置
         });
         QObject::connect(set0btn,&QPushButton::clicked,[=]()  //运动时禁止使用
         {
             mymotor[i].zero = mymotor[i].realPosition;
-            saveJson(mymotor[i],i,"/demo/temp.json");
+            saveJson(mymotor[i],i,filepath);
         });
         QObject::connect(clearbtn,&QPushButton::clicked,[=]()
         {
@@ -158,9 +182,16 @@ void Widget::on_connect_clicked()
         p_x = p_x - w_x;
         p_y = p_y - w_y;
 
-        if(p_x<20 or p_x>660 or p_y<220 or p_y>610)
-        sendlist.clear();
+        qDebug()<<p_x<<p_y;
 
+        if(p_x<329 or p_x>1256 or p_y<537 or p_y>1036)
+        {
+            if(p_x<1389 or p_x>1700 or p_y<868 or p_y>962)
+            {
+                stopflag = 1;
+                sendlist.clear();
+            }
+        }
 
         if(!sendlist.isEmpty())
         {
@@ -230,4 +261,94 @@ void Widget::on_ccwmove_released()
 {
     stopflag = 1;
     sendlist.clear();
+}
+
+void Widget::on_BlackandWhite_clicked()
+{
+    QPalette p = this->palette();
+    if(blackflag)
+    {
+        QPixmap pix(":/new/prefix1/img/mianui02.png");
+        p.setBrush(QPalette::Window,QBrush(pix));
+        ui->BlackandWhite->setText("Black");
+        blackflag = false;
+    }
+    else
+    {
+        QPixmap pix(":/new/prefix1/img/mianui-black.png");
+        p.setBrush(QPalette::Window,QBrush(pix));
+        ui->BlackandWhite->setText("White");
+        blackflag = true;
+    }
+
+    this->setPalette(p);
+
+}
+
+void Widget::on_Clear_clicked()
+{
+    ui->statebox->clear();
+}
+
+void Widget::on_Send_clicked()
+{
+    QString text = ui->sendline->text();
+    prependMessage(text.mid(0,1).toInt(),text.mid(1,-1));
+    ui->sendline->clear();
+    ui->statebox->append(sendlist.first());
+}
+
+void Widget::on_Style_clicked()
+{
+    QString qss;
+
+    if(styleflag)
+    {
+        QFile qssFile(":/new/prefix1/qss/Utbtu.qss");
+        qssFile.open(QFile::ReadOnly);
+        if(qssFile.isOpen())
+        {
+          qss = QLatin1String(qssFile.readAll());
+          qApp->setStyleSheet(qss);
+          qssFile.close();
+        }
+        styleflag = false;
+    }
+    else
+    {
+        QFile qssFile(":/new/prefix1/qss/MacOs.qss");
+        qssFile.open(QFile::ReadOnly);
+        if(qssFile.isOpen())
+        {
+          qss = QLatin1String(qssFile.readAll());
+          qApp->setStyleSheet(qss);
+          qssFile.close();
+        }
+        styleflag = true;
+    }
+
+
+
+}
+
+void Widget::on_About_clicked()
+{
+    QMessageBox msgBox;
+    msgBox.setWindowTitle("About");
+    msgBox.setText("                         \n"
+                   "Version:1.0.20230106\n\n"
+                   "                         \n"
+                   "Powered By Tang\n");
+    msgBox.exec();
+}
+
+void Widget::on_Help_clicked()
+{
+    QMessageBox msgBox;
+    msgBox.setWindowTitle("Help");
+    msgBox.setText("QitHub:\n"
+                   "https://github.com/Mr-tang0/motor\n\n"
+                   "Email:\n"
+                   "None\n");
+    msgBox.exec();
 }

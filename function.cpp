@@ -20,9 +20,10 @@ void Widget::findPort()
 
 void Widget::loadlocalmotor(QString filePath)
 {
-    QFileInfo fileinfo(QDir::currentPath());
-    rootPath  = fileinfo.path();
+    rootPath  = QCoreApplication::applicationDirPath();
+
     QFile file(rootPath + filePath);
+
     file.open(QIODevice::ReadOnly);
     QByteArray jsonData = file.readAll();
     QJsonDocument jsonDoc = QJsonDocument::fromJson(jsonData);
@@ -73,6 +74,7 @@ void Widget::loadlocalmotor(QString filePath)
 
 void Widget::setParam(motor myMotor,int index,QString filePath)
 {
+
     setui *nw = new setui();
     nw->setAttribute(Qt::WA_DeleteOnClose);
     nw->show();
@@ -131,6 +133,7 @@ void Widget::setParam(motor myMotor,int index,QString filePath)
         mymotor[index].resolution = nw->ui->resolution->text();
 
         motorset(mymotor[index]);
+
 
         saveJson(mymotor[index],index,filePath);
 
@@ -405,7 +408,6 @@ void Widget::decode(QString res)
 
     if (address!="9")
     {
-
         if(res.mid(1,2)=="IP")//位置
         {
 
@@ -414,8 +416,6 @@ void Widget::decode(QString res)
             qDebug()<<IP;
             findChild<QLineEdit*>("realposition_"+QString::number(motoraddress+1))
                     ->setText(QString::number(IP.toInt()-mymotor[motoraddress].zero.toInt()));
-
-
         }
 
         else if(res.mid(1,2)=="AL")//报警
@@ -481,9 +481,10 @@ void Widget::decode(QString res)
 
 void Widget::closeEvent(QCloseEvent *e)
 {
+    this->setEnabled(false);
     QMessageBox msgBox;
     msgBox.setWindowTitle("提示");
-    msgBox.setText("确认退出?");
+    msgBox.setText("\n确 认 退 出 ?\n\n点击确认会安全保留您所作的更改\n");
     msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
     msgBox.setDefaultButton(QMessageBox::Ok);
     int ret = msgBox.exec();
@@ -509,6 +510,7 @@ void Widget::closeEvent(QCloseEvent *e)
     else
     {
         //忽略
+        this->setEnabled(true);
         ui->statebox->append("取消退出");
         e->ignore();
     }

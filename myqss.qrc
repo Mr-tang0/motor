@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/new/prefix1">
+        <file>qss/Aqua.qss</file>
+        <file>qss/MacOs.qss</file>
+        <file>qss/Utbtu.qss</file>
+    </qresource>
+</RCC>
