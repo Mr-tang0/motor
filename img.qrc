@@ -1,10 +1,8 @@
 <RCC>
     <qresource prefix="/new/prefix1">
-        <file>img/ui.png</file>
         <file>img/icon.png</file>
         <file>img/statebox.png</file>
-        <file>img/mainui.png</file>
-        <file>img/mianui02.png</file>
-        <file>img/mianui-black.png</file>
+        <file>img/uibright.png</file>
+        <file>img/uiDark.png</file>
     </qresource>
 </RCC>

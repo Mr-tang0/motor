@@ -1,12 +1,87 @@
 #include "widget.h"
 #include "ui_widget.h"
 
-
-#include <QFileInfo>
-#include <QDir>
-
 #include "movework.h"
 
+
+void  Widget::initUi(double change)
+{
+    this->setWindowTitle("多轴电机控制系统");
+
+//设置窗体大小
+    QList<QScreen *> s =QGuiApplication::screens();
+    double beforewidth = this->size().width();
+    QSize size = s.first()->size()*change;
+    double exchange = beforewidth/size.width();
+    this->resize(size.width(),this->size().height()/exchange);
+    size = this->size();
+
+//设置Icon
+    this->setWindowIcon(QIcon(":/new/prefix1/img/icon.png"));
+
+//设置背景
+    QPalette p = this->palette();
+    QPixmap background(":/new/prefix1/img/uibright.png");
+    background = background.scaled(size);
+    p.setBrush(QPalette::Window,QBrush(background));
+    this->setPalette(p);
+
+//部件大小适应屏幕并绑定信号
+
+    static double width = this->size().width();
+    static double heigth = this->size().height();
+
+
+    QList<QString> frame_name ={"port","motor","state","move1","move2","menu","send","Version"};
+    QList<QSize> frame_size;
+    QList<QRect> frame_rect;
+    for (int i = 0;i<frame_name.length();i++)
+    {
+        QFrame *frame = findChild<QFrame*>("frame_"+frame_name[i]);
+
+        frame->resize(frame->size()/exchange);
+        frame->move(frame->frameGeometry().x()/exchange,frame->frameGeometry().y()/exchange);
+        frame_size.append(frame->size());
+        frame_rect.append(frame->frameGeometry());
+    }
+
+
+    QObject::connect(this,&Widget::resized,[=](double x,double y)
+    {
+        double  changex = width/x;
+        double  changey = heigth/y;
+
+        QPalette p = this->palette();
+        QPixmap background(imgpath);
+        background = background.scaled(x,y);
+        p.setBrush(QPalette::Window,QBrush(background));
+        this->setPalette(p);
+
+        QList<QString> frame_name ={"port","motor","state","move1","move2","menu","send","Version"};
+
+        for (int i = 0;i<frame_name.length();i++)
+        {
+            QFrame *frame = findChild<QFrame*>("frame_"+frame_name[i]);
+
+            frame->resize(frame_size[i].width()/changex,frame_size[i].height()/changey);
+            frame->move(frame_rect[i].x()/changex,frame_rect[i].y()/changey);
+
+        }
+
+    });
+
+//导入qss文件
+    QString qss;
+    QFile qssFile(":/new/prefix1/qss/Utbtu.qss");
+    qssFile.open(QFile::ReadOnly);
+    if(qssFile.isOpen())
+    {
+      qss = QLatin1String(qssFile.readAll());
+      qApp->setStyleSheet(qss);
+      qssFile.close();
+    }
+
+}
 
 void Widget::findPort()
 {
@@ -367,7 +442,7 @@ void Widget::decode(QString res)
 {
     QString address = res.mid(0,1);
 
-    int motoraddress = NULL;
+    int motoraddress = -1;
 
     QList<QString> motorlist = {};
 
@@ -388,7 +463,7 @@ void Widget::decode(QString res)
             findChild<QPushButton*>("pushButton_"+QString::number(i+1))->setStyleSheet("background-color: white");
         }
     }
-    int temp = NULL;
+    int temp = -1;
     for (int i = 0;i<motorlist.length();i++)
     {
         if(address==motorlist[i]) break;
@@ -499,11 +574,11 @@ void Widget::closeEvent(QCloseEvent *e)
         }
         sendlist.clear();
         myPort->close();
-        delay(1000);
+        //delay(1000);
 
         ui->statebox->append("-------------------------");
         ui->statebox->append("安全退出");
-        delay(1500);
+        //delay(1500);
 
         e->accept();
     }

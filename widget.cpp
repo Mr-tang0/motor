@@ -1,9 +1,6 @@
 #include "widget.h"
 #include "ui_widget.h"
 
-#include <QFuture>
-#include <QtConcurrent/QtConcurrent>
-#include <QMouseEvent>
 
 
 QSerialPort *Widget::myPort = new QSerialPort;
@@ -17,35 +14,14 @@ Widget::Widget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::Widget)
 {
-    ui->setupUi(this);
-    this->setWindowTitle("多轴电机控制系统");
-    Qt::WindowType flag;
-    flag = Qt::WindowMinimizeButtonHint;
-    this->setWindowFlag(flag);
-    this->setFixedSize(1712,1134);
-
-    this->setWindowIcon(QIcon(":/new/prefix1/img/icon.png"));
-
-    this->setAutoFillBackground(true);
-    QPalette p = this->palette();
-    QPixmap pix(":/new/prefix1/img/mianui02.png");
-    p.setBrush(QPalette::Window,QBrush(pix));
-    this->setPalette(p);
-
-
-    QString qss;
-    QFile qssFile(":/new/prefix1/qss/Utbtu.qss");
-    qssFile.open(QFile::ReadOnly);
-    if(qssFile.isOpen())
-    {
-      qss = QLatin1String(qssFile.readAll());
-      qApp->setStyleSheet(qss);
-      qssFile.close();
-    }
-
+    ui->setupUi(this);  
+    initUi(0.6);
     findPort();
 
     filepath = "/temp.json";
+    imgpath = ":/new/prefix1/img/uibright.png";
+    appversion = "Version:1.2.20230108";
+    ui->label_Version->setText(appversion);
     loadlocalmotor(filepath);
 
 
@@ -131,8 +107,6 @@ Widget::Widget(QWidget *parent) :
     }
 
 
-
-
 }
 
 Widget::~Widget()
@@ -167,8 +141,8 @@ void Widget::on_connect_clicked()
         });
         timer->start(250);
 
-    }
 
+    }
 
     QObject::connect(timer3,&QTimer::timeout,[=]()
     {            
@@ -182,14 +156,16 @@ void Widget::on_connect_clicked()
         p_x = p_x - w_x;
         p_y = p_y - w_y;
 
-        qDebug()<<p_x<<p_y;
-
-        if(p_x<329 or p_x>1256 or p_y<537 or p_y>1036)
+        QRect rect_state = ui->frame_state->frameGeometry();
+        QRect rect_move1 = ui->frame_move1->frameGeometry();
+        QRect rect_send = ui->frame_send->frameGeometry();
+        if(p_x<rect_state.left() or p_x>rect_move1.right() or p_y<rect_state.top() or p_y>rect_state.bottom())
         {
-            if(p_x<1389 or p_x>1700 or p_y<868 or p_y>962)
+            if(p_x<rect_send.left() or p_x>rect_send.right() or p_y<rect_send.top() or p_y>rect_send.bottom())
             {
                 stopflag = 1;
                 sendlist.clear();
+                qDebug()<<p_y;
             }
         }
 
@@ -200,7 +176,7 @@ void Widget::on_connect_clicked()
         }
 
     });
-    timer3->start(100);
+    timer3->start(250);
 }
 
 void Widget::on_disconnect_clicked()
@@ -265,23 +241,18 @@ void Widget::on_ccwmove_released()
 
 void Widget::on_BlackandWhite_clicked()
 {
-    QPalette p = this->palette();
     if(blackflag)
     {
-        QPixmap pix(":/new/prefix1/img/mianui02.png");
-        p.setBrush(QPalette::Window,QBrush(pix));
-        ui->BlackandWhite->setText("Black");
+        imgpath = ":/new/prefix1/img/uibright.png";
         blackflag = false;
+        this->resize(this->size()/1.001);//触发背景适应
     }
     else
     {
-        QPixmap pix(":/new/prefix1/img/mianui-black.png");
-        p.setBrush(QPalette::Window,QBrush(pix));
-        ui->BlackandWhite->setText("White");
+        imgpath =":/new/prefix1/img/uiDark.png";
         blackflag = true;
+        this->resize(this->size()*1.001);//触发背景适应
     }
-
-    this->setPalette(p);
 
 }
 
@@ -293,9 +264,15 @@ void Widget::on_Clear_clicked()
 void Widget::on_Send_clicked()
 {
     QString text = ui->sendline->text();
-    prependMessage(text.mid(0,1).toInt(),text.mid(1,-1));
-    ui->sendline->clear();
-    ui->statebox->append(sendlist.first());
+    if (text!="")
+    {
+        prependMessage(text.mid(0,1).toInt(),text.mid(1,-1));
+        ui->sendline->clear();
+        ui->statebox->append(sendlist.first());
+    }
+    else
+        ui->statebox->append("请输入指令\n（格式：地址+指令，如：1AC）");
+
 }
 
 void Widget::on_Style_clicked()
@@ -313,6 +290,7 @@ void Widget::on_Style_clicked()
           qssFile.close();
         }
         styleflag = false;
+        this->resize(this->size()/1.001);//触发背景适应
     }
     else
     {
@@ -325,6 +303,7 @@ void Widget::on_Style_clicked()
           qssFile.close();
         }
         styleflag = true;
+        this->resize(this->size()*1.001);//触发背景适应
     }
 
 
@@ -335,10 +314,8 @@ void Widget::on_About_clicked()
 {
     QMessageBox msgBox;
     msgBox.setWindowTitle("About");
-    msgBox.setText("                         \n"
-                   "Version:1.0.20230106\n\n"
-                   "                         \n"
-                   "Powered By Tang\n");
+    QString txt = "                         \n";
+    msgBox.setText(txt+appversion+txt+"Powered By Tang\n");
     msgBox.exec();
 }
 

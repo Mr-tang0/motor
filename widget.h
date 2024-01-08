@@ -24,6 +24,14 @@
 #include<QMessageBox>
 #include<QCloseEvent>
 
+#include <QFuture>
+#include <QtConcurrent/QtConcurrent>
+#include <QMouseEvent>
+#include <QScreen>
+
+#include <QFileInfo>
+#include <QDir>
+
 namespace Ui {
 class Widget;
 }
@@ -35,6 +43,8 @@ class Widget : public QWidget
 public:
     explicit Widget(QWidget *parent = nullptr);
     ~Widget();
+
+    void initUi(double change);
 
     void setParam(motor myMotor,int index,QString filePath);
     static void delay(int t);
@@ -58,6 +68,8 @@ public:
 
     QString rootPath;
     QString filepath;
+    QString imgpath;
+    QString appversion;
 
     static QSerialPort *myPort;
 
@@ -76,6 +88,8 @@ public:
     int onlinecounter[8] ={0,0,0,0,0,0,0,0};
     bool blackflag = false;
     bool styleflag = false;
+
+
 
     QTimer *timer = new QTimer(this);
     QTimer *timer2 = new QTimer(this);
@@ -119,9 +133,15 @@ private slots:
 
 signals:
     void valueChange(int value);
+    void resized(double x ,double y);
 
 private:
     Ui::Widget *ui;
+protected:
+    void resizeEvent(QResizeEvent *event) override
+    {
+        emit resized(event->size().width(),event->size().height());
+    }
 
 
 };
