@@ -12,7 +12,7 @@ public:
     QString name,address,type,version;//基础信息
     QString rateLimit,speed,acc[2],position,positionLimit[2];//配置信息
     QString zero,alarm;//原点和报警
-    QString resolution;
+    QString resolution,resolution2;
     QString realPosition;
     int len;
     int temp;

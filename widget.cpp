@@ -20,7 +20,7 @@ Widget::Widget(QWidget *parent) :
 
     filepath = "/temp.json";
     imgpath = ":/new/prefix1/img/uibright.png";
-    appversion = "Version:1.2.20230108";
+    appversion = "Version1.3.20240109";
     ui->label_Version->setText(appversion);
     loadlocalmotor(filepath);
 
@@ -165,7 +165,6 @@ void Widget::on_connect_clicked()
             {
                 stopflag = 1;
                 sendlist.clear();
-                qDebug()<<p_y;
             }
         }
 
